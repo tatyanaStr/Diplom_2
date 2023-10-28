@@ -14,7 +14,6 @@ import site.nomoreparties.stellarburgers.json.user.UserRequest;
 import site.nomoreparties.stellarburgers.test.api.OrderApi;
 import site.nomoreparties.stellarburgers.test.api.UserApi;
 
-import java.util.ArrayList;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
