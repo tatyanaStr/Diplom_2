@@ -1,16 +1,18 @@
 package site.nomoreparties.stellarburgers.test.api_tests;
 
+import com.github.javafaker.Faker;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import site.nomoreparties.stellarburgers.additional.LoginAndDeleteUser;
-import site.nomoreparties.stellarburgers.additional.RandomValue;
 import site.nomoreparties.stellarburgers.json.order.GetIngredientsResponse;
 import site.nomoreparties.stellarburgers.json.order.IngredientsRequest;
 import site.nomoreparties.stellarburgers.json.user.UserResponse;
 import site.nomoreparties.stellarburgers.json.user.UserRequest;
+import site.nomoreparties.stellarburgers.test.api.CustomRequestSpecification;
 import site.nomoreparties.stellarburgers.test.api.OrderApi;
 import site.nomoreparties.stellarburgers.test.api.UserApi;
 
@@ -23,17 +25,19 @@ public class CreateOrderTest {
     UserApi userApi = new UserApi();
     OrderApi orderApi = new OrderApi();
     LoginAndDeleteUser del = new LoginAndDeleteUser();
+    UserRequest loginUser = new UserRequest();
+
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/";
+        RestAssured.requestSpecification = CustomRequestSpecification.requestSpec;
     }
 
     @Test
     @DisplayName("Создание заказа с ингредиентами (авторизован)")
-    public void createOrderWithIngredientsWithAuthTest(){
-        RandomValue value = new RandomValue();
-        UserRequest user = new UserRequest(value.email(), value.password(6), value.name(6));
-        UserRequest loginUser = new UserRequest(user.getEmail(), user.getPassword(), null);
+    public void createOrderWithIngredientsWithAuthTest() {
+        Faker value = new Faker();
+        UserRequest user = new UserRequest(value.internet().emailAddress(), value.internet().password(6, 10), value.name().firstName());
+        loginUser = new UserRequest(user.getEmail(), user.getPassword(), null);
         userApi.registerUser(user);
         var resp = userApi.loginUser(loginUser);
         var token = resp.body().as(UserResponse.class).getAccessToken();
@@ -41,7 +45,7 @@ public class CreateOrderTest {
         var ingredientsData = ingredientsResponse.body().as(GetIngredientsResponse.class).getData();
 
         String[] ingredientsIds = new String[ingredientsData.length];
-        for (int i  = 0; i < ingredientsData.length; i++){
+        for (int i = 0; i < ingredientsData.length; i++) {
             var id = ingredientsData[i].get_id();
             ingredientsIds[i] = id;
         }
@@ -56,16 +60,12 @@ public class CreateOrderTest {
                 .body("order", notNullValue())
                 .and()
                 .statusCode(200);
-        del.deleteUser(loginUser);
     }
 
     @Test
     @DisplayName("Создание заказа с ингредиентами (без авторизации)")
-    public void createOrderWithIngredientsWithoutAuthTest(){
-        RandomValue value = new RandomValue();
-        UserRequest user = new UserRequest(value.email(), value.password(6), value.name(6));
-        UserRequest loginUser = new UserRequest(user.getEmail(), user.getPassword(), null);
-        userApi.registerUser(user);
+    public void createOrderWithIngredientsWithoutAuthTest() {
+
         var token = "";
 
         var ingredientsResponse = orderApi.getIngredients();
@@ -73,7 +73,7 @@ public class CreateOrderTest {
         var ingredientsData = ingredientsResponse.body().as(GetIngredientsResponse.class).getData();
 
         String[] ingredientsIds = new String[ingredientsData.length];
-        for (int i  = 0; i < ingredientsData.length; i++){
+        for (int i = 0; i < ingredientsData.length; i++) {
             var id = ingredientsData[i].get_id();
             ingredientsIds[i] = id;
         }
@@ -88,17 +88,14 @@ public class CreateOrderTest {
                 .body("order", notNullValue())
                 .and()
                 .statusCode(200);
-
-        del.deleteUser(loginUser);
-
     }
 
     @Test
     @DisplayName("Создание заказа без ингредиентов (авторизован)")
-    public void createOrderWithoutIngredientsWithAuthTest(){
-        RandomValue value = new RandomValue();
-        UserRequest user = new UserRequest(value.email(), value.password(6), value.name(6));
-        UserRequest loginUser = new UserRequest(user.getEmail(), user.getPassword(), null);
+    public void createOrderWithoutIngredientsWithAuthTest() {
+        Faker value = new Faker();
+        UserRequest user = new UserRequest(value.internet().emailAddress(), value.internet().password(6, 10), value.name().firstName());
+        loginUser = new UserRequest(user.getEmail(), user.getPassword(), null);
         userApi.registerUser(user);
         var resp = userApi.loginUser(loginUser);
         var token = resp.body().as(UserResponse.class).getAccessToken();
@@ -110,25 +107,31 @@ public class CreateOrderTest {
                 .body("message", is("Ingredient ids must be provided"))
                 .and()
                 .statusCode(400);
-        del.deleteUser(loginUser);
-
     }
 
     @Test
     @DisplayName("Создание заказа c неверным хэшем (авторизован)")
-    public void createOrderIncorrectIngredientsWithAuthTest(){
-        RandomValue value = new RandomValue();
-        UserRequest user = new UserRequest(value.email(), value.password(6), value.name(6));
-        UserRequest loginUser = new UserRequest(user.getEmail(), user.getPassword(), null);
+    public void createOrderIncorrectIngredientsWithAuthTest() {
+        Faker value = new Faker();
+        UserRequest user = new UserRequest(value.internet().emailAddress(), value.internet().password(6, 10), value.name().firstName());
+        loginUser = new UserRequest(user.getEmail(), user.getPassword(), null);
         userApi.registerUser(user);
         var resp = userApi.loginUser(loginUser);
         var token = resp.body().as(UserResponse.class).getAccessToken();
-        var ingredients = new IngredientsRequest(new String[]{value.name(5)});
+        var ingredients = new IngredientsRequest(new String[]{value.lorem().characters(6)});
 
         Response response = orderApi.createOrder(token, ingredients);
         response.then().assertThat()
                 .statusCode(500);
-        del.deleteUser(loginUser);
+    }
 
+
+    @After
+    public void deleteUser() {
+        try {
+            del.deleteUser(loginUser);
+        } catch (Exception e) {
+
+        }
     }
 }

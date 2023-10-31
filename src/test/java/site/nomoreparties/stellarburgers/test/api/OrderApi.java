@@ -7,9 +7,13 @@ import static io.restassured.RestAssured.given;
 
 public class OrderApi {
 
+    private final String ingredients = "/api/ingredients";
+    private final String userOrders = "/api/orders";
+    private final String allOrders = "/api/orders/all";
+
     public Response getIngredients() {
         return given()
-                .get("/api/ingredients");
+                .get(ingredients);
     }
 
     public Response createOrder(String token, IngredientsRequest ingredients) {
@@ -19,18 +23,18 @@ public class OrderApi {
                 .header("Authorization",token)
                 .and()
                 .body(ingredients)
-                .post("/api/orders");
+                .post(userOrders);
     }
 
     public Response getAllOrders() {
         return given()
-                .get("/api/orders/all");
+                .get(allOrders);
     }
 
     public Response getUserOrders(String token) {
         return given()
                 .header("Authorization",token)
-                .get("/api/orders");
+                .get(userOrders);
     }
 
 }

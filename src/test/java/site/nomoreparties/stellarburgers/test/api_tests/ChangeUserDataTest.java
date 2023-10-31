@@ -1,5 +1,6 @@
 package site.nomoreparties.stellarburgers.test.api_tests;
 
+import com.github.javafaker.Faker;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -8,57 +9,57 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import site.nomoreparties.stellarburgers.additional.LoginAndDeleteUser;
-import site.nomoreparties.stellarburgers.additional.RandomValue;
 import site.nomoreparties.stellarburgers.json.user.PatchUserResponse;
 import site.nomoreparties.stellarburgers.json.user.UserResponse;
 import site.nomoreparties.stellarburgers.json.user.UserRequest;
+import site.nomoreparties.stellarburgers.test.api.CustomRequestSpecification;
 import site.nomoreparties.stellarburgers.test.api.UserApi;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class ChangeUserDataTest {
-    private final String EMAIL;
-    private final String PASSWORD;
-    private final String NAME;
+    private final String email;
+    private final String password;
+    private final String name;
     UserApi userApi = new UserApi();
     LoginAndDeleteUser del = new LoginAndDeleteUser();
 
+
     public ChangeUserDataTest(String email, String password, String name) {
-        this.EMAIL = email;
-        this.PASSWORD = password;
-        this.NAME = name;
+        this.email = email;
+        this.password = password;
+        this.name = name;
     }
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://stellarburgers.nomoreparties.site/";
+        RestAssured.requestSpecification = CustomRequestSpecification.requestSpec;
     }
 
     @Parameterized.Parameters
     public static Object[][] dataToChange() {
-        RandomValue value = new RandomValue();
+        Faker value = new Faker();
         return new Object[][]{
-                {value.email(), value.password(10), value.name(10)},
-                {value.email(), value.password(10), null},
-                {null, value.password(10), value.name(10)},
-                {value.email(), null, value.name(10)},
-                {value.email(), null, null},
-                {null, value.password(10), null},
-                {null, null, value.name(10)}
+                {value.internet().emailAddress(), value.internet().password(6, 10), value.name().firstName()},
+                {value.internet().emailAddress(), value.internet().password(6, 10), null},
+                {null, value.internet().password(6, 10), value.name().firstName()},
+                {value.internet().emailAddress(), null, value.name().firstName()},
+                {value.internet().emailAddress(), null, null},
+                {null, value.internet().password(6, 10), null},
+                {null, null, value.name().firstName()}
         };
     }
 
     @Test
     @DisplayName("Изменение данных пользователя (пользователь авторизован)")
     public void changeUserDataWithAuthTest() {
-        RandomValue value = new RandomValue();
-        UserRequest user = new UserRequest(value.email(), value.password(6), value.name(6));
+        Faker value = new Faker();
+        UserRequest user = new UserRequest(value.internet().emailAddress(), value.internet().password(6, 10), value.name().firstName());
         UserRequest loginUser = new UserRequest(user.getEmail(), user.getPassword(), null);
-        UserRequest reqBody = new UserRequest(EMAIL, PASSWORD, NAME);
+        UserRequest reqBody = new UserRequest(email, password, name);
 
         userApi.registerUser(user);
         var resp = userApi.loginUser(loginUser);
@@ -69,8 +70,8 @@ public class ChangeUserDataTest {
                 .and()
                 .statusCode(200);
 
-        var newUserData = new UserRequest(EMAIL != null ? EMAIL : loginUser.getEmail(),
-                PASSWORD != null ? PASSWORD : loginUser.getPassword(),
+        var newUserData = new UserRequest(email != null ? email : loginUser.getEmail(),
+                password != null ? password : loginUser.getPassword(),
                 null);
         Response passwordCheckResponse = userApi.loginUser(newUserData);
         var success = passwordCheckResponse.body().as(UserResponse.class).getSuccess();
@@ -91,10 +92,10 @@ public class ChangeUserDataTest {
     @Test
     @DisplayName("Изменение данных пользователя (пользователь не авторизован)")
     public void changeUserDataWithoutAuthTest() {
-        RandomValue value = new RandomValue();
-        UserRequest user = new UserRequest(value.email(), value.password(6), value.name(6));
+        Faker value = new Faker();
+        UserRequest user = new UserRequest(value.internet().emailAddress(), value.internet().password(6, 10), value.name().firstName());
         UserRequest loginUser = new UserRequest(user.getEmail(), user.getPassword(), null);
-        UserRequest reqBody = new UserRequest(EMAIL, PASSWORD, NAME);
+        UserRequest reqBody = new UserRequest(email, password, name);
         userApi.registerUser(user);
         var token = "";
 

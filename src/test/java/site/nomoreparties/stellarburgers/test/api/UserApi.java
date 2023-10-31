@@ -6,24 +6,29 @@ import static io.restassured.RestAssured.given;
 
 public class UserApi {
 
+    private final String register = "/api/auth/register";
+    private final String login = "/api/auth/login";
+    private final String authUser = "/api/auth/user";
+
+
     public Response registerUser(site.nomoreparties.stellarburgers.json.user.UserRequest user) {
         return given()
                 .header("Content-type", "application/json")
                 .body(user)
-                .post("/api/auth/register");
+                .post(register);
     }
 
     public Response loginUser(site.nomoreparties.stellarburgers.json.user.UserRequest user) {
         return given()
                 .header("Content-type", "application/json")
                 .body(user)
-                .post("/api/auth/login");
+                .post(login);
     }
 
     public Response getUser(String token) {
         return given()
                 .header("Authorization",token)
-                .get("/api/auth/user");
+                .get(authUser);
     }
 
     public Response patchUser(site.nomoreparties.stellarburgers.json.user.UserRequest reqBody, String token) {
@@ -32,13 +37,13 @@ public class UserApi {
                 .and()
                 .header("Authorization", token)
                 .body(reqBody)
-                .patch("/api/auth/user");
+                .patch(authUser);
     }
 
     public Response deleteUser(String token) {
         return given()
                 .header("Authorization",token)
-                .delete("/api/auth/user");
+                .delete(authUser);
     }
 
 }
