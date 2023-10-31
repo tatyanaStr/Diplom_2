@@ -14,6 +14,8 @@ Project is created with:
 * Allure 2.24.0
 * RestAssured 4.4.0
 * gson 2.8.9
+* Faker 1.0.2
+* Lombok 1.18.28
 
 ## Setup
 To run this project:

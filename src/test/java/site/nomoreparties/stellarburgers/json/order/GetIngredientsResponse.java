@@ -1,22 +1,15 @@
 package site.nomoreparties.stellarburgers.json.order;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class GetIngredientsResponse {
+
+    @Getter
+    @Setter
     private Boolean success;
+
+    @Getter
+    @Setter
     private GetDataIngredientsResponse[] data;
-
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(Boolean success) {
-        this.success = success;
-    }
-
-    public GetDataIngredientsResponse[] getData() {
-        return data;
-    }
-
-    public void setData(GetDataIngredientsResponse[] data) {
-        this.data = data;
-    }
 }

@@ -1,39 +1,23 @@
 package site.nomoreparties.stellarburgers.json.user;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class UserResponse {
+
+    @Getter
+    @Setter
     private Boolean success;
+
+    @Getter
+    @Setter
     private String accessToken;
+
+    @Getter
+    @Setter
     private String refreshToken;
+
+    @Getter
+    @Setter
     private UserInfoResponse user;
-
-    public UserInfoResponse getUser() {
-        return user;
-    }
-
-    public void setUser(UserInfoResponse user) {
-        this.user = user;
-    }
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(Boolean success) {
-        this.success = success;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
 }
